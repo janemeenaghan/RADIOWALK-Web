@@ -23,14 +23,40 @@ export function AudioStreamBar({ initialStationName = "", initialUsername = "", 
   
   const { selectedStation } = useAudio();
 
-  // Update state when selectedStation changes
+  // Update state when selectedStation changes and auto-play new stream
   useEffect(() => {
     if (selectedStation) {
-      setStationName(selectedStation.name);
-      setUsername(selectedStation.owner?.username || "");
-      setStreamUrl(selectedStation.streamLink || "");
+      const newStationName = selectedStation.name;
+      const newUsername = selectedStation.owner?.username || "";
+      const newStreamUrl = selectedStation.streamLink || "";
+      
+      // Check if this is actually a different station
+      const isDifferentStation = newStationName !== stationName || newStreamUrl !== streamUrl;
+      
+      setStationName(newStationName);
+      setUsername(newUsername);
+      setStreamUrl(newStreamUrl);
+      
+      // Auto-play the new stream if it's different and we have a valid URL
+      if (isDifferentStation && newStreamUrl && audioRef.current) {
+        // Stop current audio if playing
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        }
+        
+        // Load and play new stream
+        audioRef.current.src = newStreamUrl;
+        audioRef.current.load();
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch((error) => {
+            console.error("Failed to auto-play new station:", error);
+            setIsPlaying(false);
+          });
+      }
     }
-  }, [selectedStation]);
+  }, [selectedStation, stationName, streamUrl, isPlaying]);
 
   // Initialize audio volume when component mounts
   useEffect(() => {
