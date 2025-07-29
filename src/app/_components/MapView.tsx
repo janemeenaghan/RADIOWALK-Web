@@ -76,6 +76,7 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
   useEffect(() => {
     if (position) {
       setMapCenter([position.latitude, position.longitude]);
+      setMapKey(prev => prev + 1); // Force map to re-center on user location
     }
   }, [position]);
 
@@ -88,17 +89,18 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
   }, [selectedStation]);
 
   return (
-    <div className="w-full h-64 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+    <div className="fixed inset-0 w-full h-full">
       <MapContainer
         key={mapKey}
         center={mapCenter}
         zoom={13}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100vh', width: '100vw' }}
         className="z-0"
+        zoomControl={false}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
         
         {/* User location marker */}
