@@ -8,7 +8,10 @@ import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "RADIOWALK",
   description: "RADIOWALK is a platform for sharing and discovering radio stations.",
-  icons: [{ rel: "icon", url: "/radiowalk.svg", type: "image/svg+xml" }],
+  icons: [
+    { rel: "icon", url: "/radiowalk.png", type: "image/png" },
+    { rel: "icon", url: "/radiowalk.svg", type: "image/svg+xml" }
+  ],
 };
 
 const geist = Geist({

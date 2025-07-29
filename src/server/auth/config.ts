@@ -40,6 +40,46 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   callbacks: {
+    signIn: async ({ user, account, profile }) => {
+      // Generate username if user doesn't have one
+      if (user.email) {
+        const existingUser = await db.user.findUnique({
+          where: { email: user.email },
+          select: { username: true, email: true, name: true },
+        });
+
+        if (existingUser && !existingUser.username) {
+          let username: string;
+
+          // Priority 1: email prefix
+          if (existingUser.email) {
+            username = existingUser.email.split('@')[0];
+          }
+          // Priority 2: name without spaces
+          else if (existingUser.name) {
+            username = existingUser.name.replace(/\s+/g, '');
+          }
+          // Priority 3: fallback
+          else {
+            username = 'AnonymousUser';
+          }
+
+          // Ensure username is unique by adding numbers if needed
+          let finalUsername = username;
+          let counter = 1;
+          while (await db.user.findUnique({ where: { username: finalUsername } })) {
+            finalUsername = `${username}${counter}`;
+            counter++;
+          }
+
+          await db.user.update({
+            where: { email: user.email },
+            data: { username: finalUsername },
+          });
+        }
+      }
+      return true;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {

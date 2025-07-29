@@ -6,17 +6,38 @@ import type { ReactNode } from 'react';
 interface Station {
   id: string;
   name: string;
-  streamLink?: string;
+  latitude: number;
+  longitude: number;
+  type: 'PUBLIC' | 'PRIVATE';
+  streamLink?: string | null;
+  streamName?: string | null;
+  tags?: string | null;
+  favicon?: string | null;
+  likes: number;
+  ownerId?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  distance?: number;
   owner?: {
-    username?: string;
-    name?: string;
-  };
+    id: string;
+    username?: string | null;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    emailVerified?: Date | null;
+  } | null;
+  sharedUsers?: Array<{
+    id: string;
+    username?: string | null;
+    name?: string | null;
+  }>;
 }
 
 interface AudioContextType {
   selectedStation: Station | null;
   setSelectedStation: (station: Station | null) => void;
-  updateSelectedStation: (name: string, username: string, streamUrl: string) => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -28,24 +49,12 @@ interface AudioProviderProps {
 export function AudioProvider({ children }: AudioProviderProps) {
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
 
-  const updateSelectedStation = (name: string, username: string, streamUrl: string) => {
-    setSelectedStation({
-      id: 'current', // temporary ID for the current playing station
-      name,
-      streamLink: streamUrl,
-      owner: {
-        username,
-        name: username,
-      },
-    });
-  };
 
   return (
     <AudioContext.Provider
       value={{
         selectedStation,
         setSelectedStation,
-        updateSelectedStation,
       }}
     >
       {children}

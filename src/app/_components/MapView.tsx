@@ -11,6 +11,29 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
+// Custom marker icons
+const createStationIcon = () => {
+  if (typeof window === 'undefined') return null;
+  const L = require('leaflet');
+  return new L.Icon({
+    iconUrl: '/radiowalk.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+};
+
+const createUserIcon = () => {
+  if (typeof window === 'undefined') return null;
+  const L = require('leaflet');
+  return new L.Icon({
+    iconUrl: '/usericon.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+};
+
 interface Station {
   id: string;
   name: string;
@@ -18,13 +41,13 @@ interface Station {
   longitude: number;
   owner?: {
     id: string;
-    username: string | null;
-    name: string | null;
-    email: string | null;
-    image: string | null;
+    username?: string | null;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
     createdAt: Date;
     updatedAt: Date;
-    emailVerified: Date | null;
+    emailVerified?: Date | null;
   } | null;
   type: 'PUBLIC' | 'PRIVATE';
   distance?: number;
@@ -40,6 +63,14 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
   const { position } = useLocation();
   const [mapCenter, setMapCenter] = useState<[number, number]>([37.7749, -122.4194]); // Default SF
   const [mapKey, setMapKey] = useState(0); // Force re-render when center changes
+  const [stationIcon, setStationIcon] = useState<any>(null);
+  const [userIcon, setUserIcon] = useState<any>(null);
+
+  // Initialize custom icons on client side
+  useEffect(() => {
+    setStationIcon(createStationIcon());
+    setUserIcon(createUserIcon());
+  }, []);
 
   // Update map center when user location changes
   useEffect(() => {
@@ -55,14 +86,6 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
       setMapKey(prev => prev + 1); // Force map to re-center
     }
   }, [selectedStation]);
-
-  if (typeof window === 'undefined') {
-    return (
-      <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-        <p className="text-gray-500">Loading map...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full h-64 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
@@ -80,7 +103,10 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
         
         {/* User location marker */}
         {position && (
-          <Marker position={[position.latitude, position.longitude]}>
+          <Marker 
+            position={[position.latitude, position.longitude]}
+            icon={userIcon}
+          >
             <Popup>
               <div className="p-2">
                 <div className="font-semibold text-blue-600">📍 Your Location</div>
@@ -97,6 +123,7 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
           <Marker
             key={station.id}
             position={[station.latitude, station.longitude]}
+            icon={stationIcon}
             eventHandlers={{
               click: () => onStationSelect(station),
             }}

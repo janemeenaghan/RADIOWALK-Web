@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from 'next/dynamic';
 import { useAudio } from "~/contexts/AudioContext";
 import { useLocation } from "~/contexts/LocationContext";
 import { api } from "~/trpc/react";
 import { StationType } from "@prisma/client";
 import { NearbyStations } from "./nearby-stations";
 import { AudioStreamBar } from "./AudioStreamBar";
-import { MapView } from "./MapView";
+
+const MapView = dynamic(() => import('./MapView').then(mod => ({ default: mod.MapView })), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+      <p className="text-gray-500">Loading map...</p>
+    </div>
+  )
+});
 
 type ViewMode = 'PUBLIC' | 'PRIVATE' | 'BOTH';
 
@@ -63,15 +72,7 @@ export function StationSelectionWrapper() {
   const error = publicError || privateError;
 
   const handleStationSelect = (station: any) => {
-    setSelectedStation({
-      id: station.id,
-      name: station.name,
-      streamLink: station.streamLink || station.streamUrl,
-      owner: {
-        username: station.owner?.username || 'Unknown',
-        name: station.owner?.name || station.owner?.username || 'Unknown',
-      },
-    });
+    setSelectedStation(station);
   };
 
   return (
