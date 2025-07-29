@@ -221,6 +221,57 @@ export function RadioGardenSidebar({ className = "", onMapStationsUpdate }: Radi
   return (
     <div className={`fixed left-0 top-0 h-screen w-1/4 bg-white/95 backdrop-blur-sm shadow-2xl z-50 flex flex-col ${className}`}>
       
+      {/* Navigation Bar - 1/6 height */}
+      <div className="h-20 border-b border-gray-200 bg-white/98 flex items-center justify-around px-2">
+        <button
+          onClick={() => { setNavigationMode('nearby'); setViewMode('PUBLIC'); }}
+          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
+            navigationMode === 'nearby' && viewMode === 'PUBLIC' 
+              ? 'bg-green-100 text-green-700' 
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <span className="text-lg mb-1">◎</span>
+          <span className="text-xs font-medium">Public</span>
+        </button>
+
+        <button
+          onClick={() => { setNavigationMode('nearby'); setViewMode('PRIVATE'); }}
+          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
+            navigationMode === 'nearby' && viewMode === 'PRIVATE' 
+              ? 'bg-green-100 text-green-700' 
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <span className="text-lg mb-1">●</span>
+          <span className="text-xs font-medium">Private</span>
+        </button>
+
+        <button
+          onClick={() => { setNavigationMode('nearby'); setViewMode('BOTH'); }}
+          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
+            navigationMode === 'nearby' && viewMode === 'BOTH' 
+              ? 'bg-green-100 text-green-700' 
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <span className="text-lg mb-1">◉</span>
+          <span className="text-xs font-medium">Both</span>
+        </button>
+
+        <button
+          onClick={() => setNavigationMode('browse')}
+          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
+            navigationMode === 'browse' 
+              ? 'bg-green-100 text-green-700' 
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <Plus className="h-5 w-5 mb-1" />
+          <span className="text-xs font-medium">Add Station</span>
+        </button>
+      </div>
+
       {/* Main Content Area - 2/3 height */}
       <div className="flex-1 overflow-hidden flex flex-col p-4">
         {navigationMode === 'nearby' ? (
@@ -352,56 +403,6 @@ export function RadioGardenSidebar({ className = "", onMapStationsUpdate }: Radi
         )}
       </div>
 
-      {/* Navigation Bar - 1/6 height */}
-      <div className="h-20 border-t border-gray-200 bg-white/98 flex items-center justify-around px-2">
-        <button
-          onClick={() => { setNavigationMode('nearby'); setViewMode('PUBLIC'); }}
-          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
-            navigationMode === 'nearby' && viewMode === 'PUBLIC' 
-              ? 'bg-green-100 text-green-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <span className="text-lg mb-1">◎</span>
-          <span className="text-xs font-medium">Public</span>
-        </button>
-
-        <button
-          onClick={() => { setNavigationMode('nearby'); setViewMode('PRIVATE'); }}
-          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
-            navigationMode === 'nearby' && viewMode === 'PRIVATE' 
-              ? 'bg-green-100 text-green-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <span className="text-lg mb-1">●</span>
-          <span className="text-xs font-medium">Private</span>
-        </button>
-
-        <button
-          onClick={() => { setNavigationMode('nearby'); setViewMode('BOTH'); }}
-          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
-            navigationMode === 'nearby' && viewMode === 'BOTH' 
-              ? 'bg-green-100 text-green-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <span className="text-lg mb-1">◉</span>
-          <span className="text-xs font-medium">Both</span>
-        </button>
-
-        <button
-          onClick={() => setNavigationMode('browse')}
-          className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
-            navigationMode === 'browse' 
-              ? 'bg-green-100 text-green-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <Plus className="h-5 w-5 mb-1" />
-          <span className="text-xs font-medium">Add Station</span>
-        </button>
-      </div>
 
       {/* Audio Stream Bar - 1/6 height */}
       <div className="h-20 border-t border-gray-200 bg-white">

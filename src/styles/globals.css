@@ -19,3 +19,14 @@
 .leaflet-popup-tip {
   @apply border-gray-200;
 }
+
+/* Custom marker styles */
+.custom-station-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.custom-user-marker {
+  background: none !important;
+  border: none !important;
+}

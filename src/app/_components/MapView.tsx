@@ -11,26 +11,58 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
-// Custom marker icons
-const createStationIcon = () => {
+// Custom marker icons - Green dots based on likes, white when selected
+const createStationIcon = (likes: number, isSelected: boolean = false) => {
   if (typeof window === 'undefined') return null;
   const L = require('leaflet');
-  return new L.Icon({
-    iconUrl: '/radiowalk.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
+  
+  // Determine size based on likes: 0-20 (small), 21-1000 (medium), 1001+ (large)
+  let size: number;
+  if (likes >= 1001) {
+    size = 16; // Large
+  } else if (likes >= 21) {
+    size = 12; // Medium
+  } else {
+    size = 8; // Small
+  }
+  
+  // Selected stations are white, unselected are green
+  const fillColor = isSelected ? '#ffffff' : '#22c55e';
+  const strokeColor = '#ffffff';
+  
+  const dotSvg = `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1"/>
+    </svg>
+  `;
+  
+  return new L.DivIcon({
+    html: dotSvg,
+    className: 'custom-station-marker',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, 0]
   });
 };
 
 const createUserIcon = () => {
   if (typeof window === 'undefined') return null;
   const L = require('leaflet');
-  return new L.Icon({
-    iconUrl: '/usericon.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
+  
+  // White ring circle for user location
+  const ringSize = 24;
+  const ringSvg = `
+    <svg width="${ringSize}" height="${ringSize}" viewBox="0 0 ${ringSize} ${ringSize}" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${ringSize/2}" cy="${ringSize/2}" r="${(ringSize/2) - 2}" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.9"/>
+    </svg>
+  `;
+  
+  return new L.DivIcon({
+    html: ringSvg,
+    className: 'custom-user-marker',
+    iconSize: [ringSize, ringSize],
+    iconAnchor: [ringSize/2, ringSize/2],
+    popupAnchor: [0, 0]
   });
 };
 
@@ -63,12 +95,10 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
   const { position } = useLocation();
   const [mapCenter, setMapCenter] = useState<[number, number]>([37.7749, -122.4194]); // Default SF
   const [mapKey, setMapKey] = useState(0); // Force re-render when center changes
-  const [stationIcon, setStationIcon] = useState<any>(null);
   const [userIcon, setUserIcon] = useState<any>(null);
 
-  // Initialize custom icons on client side
+  // Initialize user icon on client side
   useEffect(() => {
-    setStationIcon(createStationIcon());
     setUserIcon(createUserIcon());
   }, []);
 
@@ -121,15 +151,17 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
         )}
 
         {/* Station markers */}
-        {stations.map((station) => (
-          <Marker
-            key={station.id}
-            position={[station.latitude, station.longitude]}
-            icon={stationIcon}
-            eventHandlers={{
-              click: () => onStationSelect(station),
-            }}
-          >
+        {stations.map((station) => {
+          const isSelected = selectedStation?.id === station.id;
+          return (
+            <Marker
+              key={station.id}
+              position={[station.latitude, station.longitude]}
+              icon={createStationIcon(station.likes || 0, isSelected)}
+              eventHandlers={{
+                click: () => onStationSelect(station),
+              }}
+            >
             <Popup>
               <div className="p-3 min-w-[200px]">
                 {/* Station bubble with shadcn-style design */}
@@ -156,8 +188,9 @@ export function MapView({ stations, selectedStation, onStationSelect }: MapViewP
                 </div>
               </div>
             </Popup>
-          </Marker>
-        ))}
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
