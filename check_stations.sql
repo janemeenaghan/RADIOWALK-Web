@@ -1,0 +1,1 @@
+SELECT id, name, "ownerId", "createdAt" FROM "Station" ORDER BY "createdAt" DESC;
